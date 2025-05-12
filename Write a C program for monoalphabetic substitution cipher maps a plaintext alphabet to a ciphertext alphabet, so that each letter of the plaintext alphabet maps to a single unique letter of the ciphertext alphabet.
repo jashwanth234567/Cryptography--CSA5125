@@ -1,0 +1,17 @@
+#include <stdio.h>
+#include <ctype.h>
+int main() {
+    char ch;
+    char key[] = "QWERTYUIOPASDFGHJKLZXCVBNM";
+    printf("Enter text: ");
+    while ((ch = getchar()) != '\n') {
+        if (isupper(ch))
+            putchar(key[ch - 'A']);
+        else if (islower(ch))
+            putchar(tolower(key[ch - 'a']));
+        else
+            putchar(ch);  
+    }
+    printf("\n");
+    return 0;
+}
