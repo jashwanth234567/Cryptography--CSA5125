@@ -1,0 +1,104 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define SIZE 5
+
+char matrix[SIZE][SIZE];
+char key[100];
+
+void createMatrix(char *key) {
+    int k = 0;
+    int alpha[26] = {0};
+    for (int i = 0; key[i] != '\0'; i++) {
+        if (isalpha(key[i])) {
+            char ch = toupper(key[i]);
+            if (ch == 'J') ch = 'I'; // Treat J as I
+            if (!alpha[ch - 'A']) {
+                alpha[ch - 'A'] = 1;
+                matrix[k / SIZE][k % SIZE] = ch;
+                k++;
+            }
+        }
+    }
+    for (char ch = 'A'; ch <= 'Z'; ch++) {
+        if (ch == 'J') continue;
+        if (!alpha[ch - 'A']) {
+            matrix[k / SIZE][k % SIZE] = ch;
+            k++;
+        }
+    }
+}
+
+void preparePlaintext(char *plaintext, char *prepared) {
+    int k = 0;
+    for (int i = 0; plaintext[i] != '\0'; i++) {
+        if (isalpha(plaintext[i])) {
+            prepared[k++] = toupper(plaintext[i]);
+        }
+    }
+    for (int i = 0; i < k; i += 2) {
+        if (prepared[i] == prepared[i + 1]) {
+            for (int j = k; j > i + 1; j--) {
+                prepared[j] = prepared[j - 1];
+            }
+            prepared[i + 1] = 'X';
+            k++;
+        }
+    }
+    if (k % 2 != 0) {
+        prepared[k++] = 'X';
+    }
+    prepared[k] = '\0';
+}
+
+void encrypt(char *prepared, char *ciphertext) {
+    int k = 0;
+    for (int i = 0; prepared[i] != '\0'; i += 2) {
+        char a = prepared[i];
+        char b = prepared[i + 1];
+        int rowA, colA, rowB, colB;
+        for (int r = 0; r < SIZE; r++) {
+            for (int c = 0; c < SIZE; c++) {
+                if (matrix[r][c] == a) {
+                    rowA = r;
+                    colA = c;
+                }
+                if (matrix[r][c] == b) {
+                    rowB = r;
+                    colB = c;
+                }
+            }
+        }
+        if (rowA == rowB) {
+            ciphertext[k++] = matrix[rowA][(colA + 1) % SIZE];
+            ciphertext[k++] = matrix[rowB][(colB + 1) % SIZE];
+        } else if (colA == colB) {
+            ciphertext[k++] = matrix[(rowA + 1) % SIZE][colA];
+            ciphertext[k++] = matrix[(rowB + 1) % SIZE][colB];
+        } else {
+            ciphertext[k++] = matrix[rowA][colB];
+            ciphertext[k++] = matrix[rowB][colA];
+        }
+    }
+    ciphertext[k] = '\0';
+}
+
+int main() {
+    char plaintext[100], prepared[100], ciphertext[100];
+    printf("Enter the keyword: ");
+    fgets(key, sizeof(key), stdin);
+    key[strcspn(key, "\n")] = 0; // Remove newline character
+    createMatrix(key);
+    
+    printf("Enter the plaintext: ");
+    fgets(plaintext, sizeof(plaintext), stdin);
+    plaintext[strcspn(plaintext, "\n")] = 0; // Remove newline character
+    preparePlaintext(plaintext, prepared);
+    
+    encrypt(prepared, ciphertext);
+    printf("Ciphertext: %s\n", ciphertext);
+    
+    return 0;
+}
+
