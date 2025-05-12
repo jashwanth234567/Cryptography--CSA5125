@@ -1,0 +1,21 @@
+#include <stdio.h>
+#include <ctype.h>
+
+int main() {
+    char ch;
+    int k;
+    printf("Enter shift (1-25): ");
+    scanf("%d", &k);
+    getchar(); 
+
+    printf("Enter text: ");
+    while ((ch = getchar()) != '\n') {
+        if (isalpha(ch)) {
+            char base = islower(ch) ? 'a' : 'A';
+            ch = (ch - base + k) % 26 + base;
+        }
+        putchar(ch);
+    }
+    printf("\n");
+    return 0;
+}
